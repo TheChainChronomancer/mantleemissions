@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import reactLogo from './assets/react.svg'
 
 
+
 import { Displaynfts } from './components';
 
 import Web3 from 'web3';
@@ -22,6 +23,11 @@ function App() {
     value: '',
     geo: '',
   })
+
+  const [carpoolid, setCarpoolid] = useState('');
+  const [passengerid, setPassengerid] = useState('');
+
+
   var nfttobemintedcid = '';
   var imgCid = '';
 
@@ -423,6 +429,9 @@ function App() {
 
   const connect = async () =>{
 
+
+
+
     if(window.ethereum){
       try {
         await window.ethereum.request({
@@ -463,6 +472,11 @@ function App() {
         setAccount(accounts[0]);
         setContract(new window.web3.eth.Contract(contractAbi, contractAddress))
       })
+
+      const params = window.location.pathname.substring(1).split('/')
+
+      setCarpoolid(params[0])
+      setPassengerid(params[1])
     } else {
       alert('Metamask not detected')
       return;
@@ -538,6 +552,8 @@ function App() {
             })
             imgCid = '';
             nfttobemintedcid = ''
+            setCarpoolid('');
+            setPassengerid('');
             setIsMinting(false);
           })
       } 
@@ -582,6 +598,23 @@ function App() {
     }
   }
 
+  const fetchValues = async() => {
+    if(carpoolid.length === 13 && passengerid.length > 1){
+      const req = await axios.get(`https://us-central1-thecarbongames.cloudfunctions.net/carpoolDetails?carpoolId=${carpoolid}&passengerId=${passengerid}`)
+      setForm({...form, username: req.data.userId, geo: req.data.city, value: req.data.co2})
+    }
+  }
+
+  useEffect(() => {
+    if(carpoolid.length === 13){
+      fetchValues();
+    }
+  }, [carpoolid])
+
+  const handleCarpoolId = (e: any) => {
+    setCarpoolid(e.target.value)
+  }
+
 
   
 
@@ -602,17 +635,20 @@ function App() {
       </div>
       <form className="m-[2vw]" onSubmit={handleMint}>
         <div className="flex flex-col gap-5">
+          <label className="block text-sm font-medium text-gray-900" htmlFor="carpoolid">Carpool ID:</label>
+          <input type="text" value={carpoolid} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#4649ff] focus:border-[#4649ff] outline-none block w-full p-3" onChange={handleCarpoolId} id="carpoolid" disabled name="carpoolid">
+          </input>
           <label className="block text-sm font-medium text-gray-900" htmlFor="username">User:</label>
-          <input type="text" value={form.username} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#4649ff] focus:border-[#4649ff] outline-none block w-full p-3" onChange={handleChange} id="username" name="username">
+          <input type="text" value={form.username} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#4649ff] focus:border-[#4649ff] outline-none block w-full p-3" onChange={handleChange} disabled id="username" name="username">
           </input>
           <label className="block text-sm font-medium text-gray-900" htmlFor="mintdate">Mint date</label>
           <input type="date" value={form.mintdate} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#4649ff] focus:border-[#4649ff] outline-none block w-full p-3" id="mintdate" name="mintdate" disabled>
           </input>
           <label className="block text-sm font-medium text-gray-900" htmlFor="value">Value:</label>
-          <input type="text" value={form.value} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#4649ff] focus:border-[#4649ff] outline-none block w-full p-3" onChange={handleChange} id="value" name="value">
+          <input type="text" value={form.value} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#4649ff] focus:border-[#4649ff] outline-none block w-full p-3" onChange={handleChange} disabled id="value" name="value">
           </input>
           <label className="block text-sm font-medium text-gray-900" htmlFor="geo">Geo:</label>
-          <input type="text" value={form.geo} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#4649ff] focus:border-[#4649ff] outline-none block w-full p-3" onChange={handleChange} id="geo" name="geo">
+          <input type="text" value={form.geo} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#4649ff] focus:border-[#4649ff] outline-none block w-full p-3" onChange={handleChange} disabled id="geo" name="geo">
           </input>
           <label className="block text-sm font-medium text-gray-900" htmlFor="imgcid">Image:</label>
           <input type="file" accept="image/*" onChange={handleImageUpload} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-[#4649ff] focus:border-[#4649ff] outline-none block w-full p-3" id="imgcid" name="geo">
